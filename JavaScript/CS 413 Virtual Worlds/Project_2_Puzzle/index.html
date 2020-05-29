@@ -1,0 +1,37 @@
+<html>
+   <head>
+     <title> Project 2 Puzzle </title>
+   </head>
+   <body>
+      <h1> Sliding Puzzles </h1>
+      <div id="gameV2"></div>
+   
+      <h1> Instructions </h1>
+      <p>How to play: Click on the tiles to solve the puzzle</p>
+
+      <h1> Comments </h1>
+      <div id="disqus_thread"></div>
+
+      <script>
+
+         (function() {
+   
+         var d = document, s = d.createElement('script');
+
+         s.src = 'http://nau-cs413.disqus.com/embed.js';
+
+         s.setAttribute('data-timestamp', +new Date());
+
+         (d.head || d.body).appendChild(s);
+
+         })(); 
+
+      </script>
+
+      <script  src="pixi.js"></script>
+      <script  src="gameV2.js"></script>
+      <script  src="pixi-sound.js"></script>
+      <script  src="tweenjs.min.js"></script>
+
+   </body>
+</html>

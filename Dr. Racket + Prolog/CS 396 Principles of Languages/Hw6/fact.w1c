@@ -1,0 +1,16 @@
+input n;
+if 0 < n
+then 
+  fact := 1;
+  repeat
+   fact := n * fact;
+   n := n - 1
+  until n==0;
+  if fact == 0
+  then fact := 1
+  else skip
+  end;
+  print fact
+else
+  skip
+end

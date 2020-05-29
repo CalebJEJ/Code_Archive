@@ -1,0 +1,39 @@
+<html>
+   <head>
+     <title> Project 1 Minimalism </title>
+   </head>
+   <body>
+      <h1> Moving Around Rabbit </h1>
+      <div id="gameV1"></div>
+   
+      <h1> Instructions </h1>
+      <p>How to play: WASD to move.</p>
+	  <p>W: moves the rabbit up.</p>
+	  <p>D: moves the rabbit right.</p>
+	  <p>S: moves the rabbit down.</p>
+	  <p>A: moves the rabbit left.</p>
+
+      <h1> Comments </h1>
+      <div id="disqus_thread"></div>
+
+      <script>
+
+         (function() {
+   
+         var d = document, s = d.createElement('script');
+
+         s.src = 'http://nau-cs413.disqus.com/embed.js';
+
+         s.setAttribute('data-timestamp', +new Date());
+
+         (d.head || d.body).appendChild(s);
+
+         })(); 
+
+      </script>
+
+      <script  src="pixi.js"></script>
+      <script  src="gameV1.js"></script>
+
+   </body>
+</html>

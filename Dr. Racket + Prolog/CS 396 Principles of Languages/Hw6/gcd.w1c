@@ -1,0 +1,14 @@
+input a;
+input b;
+if 0 < a && 0 < b
+then 
+  while !(a==b) do
+    if a<b
+    then b:=b + -1 * a
+    else a:=a-b
+    end
+  end;
+  print a
+else
+  skip
+end

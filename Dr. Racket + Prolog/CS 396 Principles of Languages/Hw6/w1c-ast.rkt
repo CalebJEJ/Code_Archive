@@ -1,0 +1,185 @@
+#lang racket
+
+(provide (all-defined-out))
+
+; ===== W1C Abstract Syntax Trees =====
+
+; Correspondence non-terminal of the W1 syntax
+; and Scheme representation:
+; - num:  integer
+; - var:  symbol
+; - exp: integer, symbol,
+;   or (list 'not e1)
+;   or (list s e1 e2)
+;   where s is a symbol representing
+;           an operation
+;           ('add, 'mul, 'sub, 'eq, 'lt) 
+;         e1, e2 are representing
+;         expressions
+; For example the exp of W1:
+;       (x+y)*42
+; is represented by the Scheme expression:
+; (list 'mul (list 'add 'x 'y) 42) 
+;
+; - com:
+; skip: 'skip
+; x:=e: (list 'x re)
+; com1; com2: (list 'seq rcom1 rcom2)
+; if e then com1 else com2: (list 'if re rcom1 rcom2)
+; while e do com: (list 'while re rcom)
+; where r-non-terminal means the representation
+;       of such a non terminal in Scheme
+
+; =========================================
+; Type Predicates for W1C Abstract Syntax
+
+(define num?
+  (lambda (n) (integer? n)))
+
+(define (var? v)
+  (symbol? v))
+
+(define (binop? op)
+  (and (symbol? op)
+       (or (symbol=? op 'add)
+           (symbol=? op 'mul)
+           (symbol=? op 'sub)
+           (symbol=? op 'and)
+           (symbol=? op 'lt)
+           (symbol=? op 'eq))))
+
+(define (exp-binop? e)
+   (and (list? e) (= (length e) 3)
+           (binop? (car e))
+           (exp? (cadr e)) (exp? (caddr e))))
+
+(define (unop? op)
+  (and (symbol? op)
+       (symbol=? op 'not)))
+
+(define (exp-unop? e)
+  (and (list? e) (= (length e) 2)
+       (unop? (car e))(exp? (cadr e))))
+
+(define (exp? e)
+  (or (num? e)
+      (var? e)
+      (exp-unop? e)
+      (exp-binop? e)))
+
+(define (com-skip? c)
+  (and (symbol? c)(symbol=? c 'skip)))
+
+(define (com-assign? c)
+  (and (list? c)(= 3 (length c))
+       (let ((tag (car c))(var (cadr c))(exp (caddr c)))
+         (and(symbol? tag)(symbol=? tag 'assign)
+             (var? var)(exp? exp)))))
+
+(define (com-seq? c)
+  (and (list? c)(= 3 (length c))
+       (let ((tag (car c))(com1 (cadr c))(com2 (caddr c)))
+         (and(symbol? tag)(symbol=? tag 'seq)
+             (com? com1)(com? com2)))))
+
+(define (com-if? c)
+  (and (list? c)(= 4 (length c))
+       (let ((tag (car c))(exp (cadr c))
+                          (com1 (caddr c))(com2 (cadddr c)))
+         (and(symbol? tag)(symbol=? tag 'if)
+             (exp? exp)(com? com1)(com? com2)))))
+
+(define (com-while? c)
+  (and (list? c)(= 3 (length c))
+       (let ((tag (car c))(exp (cadr c))(com (caddr c)))
+         (and(symbol? tag)(symbol=? tag 'while)
+             (exp? exp)(com? com)))))
+
+(define (com-io? c)
+  (and (list? c)(= 2 (length c))
+       (let ((tag (car c))(var (cadr c)))
+         (and (symbol? tag)(or (symbol=? tag 'print)
+                               (symbol=? tag 'input))
+              (symbol? var)))))
+
+;define of com-repeat for project by Caleb Johnson
+(define name "Caleb Johnson")
+
+(define (com-repeat? c)
+  (and (list? c) (= 3 (length c))
+       (let ((tag (car c))(com (cadr c))(exp (caddr c)))
+         (and (symbol? tag) (symbol=? tag 'repeat) (com? com) (exp? exp)
+          )
+        )
+   )
+ )
+
+(define (com? c)
+  (or (com-skip? c)
+      (com-assign? c)
+      (com-seq? c)
+      (com-if? c)
+      (com-while? c)
+      (com-io? c)
+      ;new case
+      (com-repeat? c)))
+
+; Helper functions to decide what specific command
+; is a given command known to satisfy com?
+(define (skip? com)
+  (and (symbol? com)(symbol=? com 'skip)))
+
+(define (assign? com)
+  (and (list? com)(symbol=? (car com) 'assign)))
+
+(define (seq? com)
+   (and (list? com)(symbol=? (car com) 'seq)))
+
+(define (if? com)
+  (and (list? com)(symbol=? (car com) 'if)))
+
+(define (while? com)
+  (and (list? com)(symbol=? (car com) 'while)))
+
+(define (input? com)
+  (and (list? com)(symbol=? (car com) 'input)))
+
+(define (print? com)
+  (and (list? com)(symbol=? (car com) 'print)))
+
+;repeat? defined here for project requirements, written with similar syntax matching the above functions
+(define (repeat? com)
+  (and (list? com)(symbol=? (car com) 'repeat)))
+
+; Helper functions to build commands
+
+(define (mk-assign x e) (list 'assign x e))
+(define (mk-seq c1 c2) (list 'seq c1 c2))
+(define (mk-if e c1 c2) (list 'if e c1 c2))
+(define (mk-while e c) (list 'while e c))
+(define (mk-print x) (list 'print x))
+(define (mk-input x) (list 'input x))
+(define (mk-repeat c e) (list 'repeat c e))
+
+; Helper functions to deconstruct a command
+
+; com is assumed to be an assign
+(define (get-expr com)  (caddr com))
+
+; com is assumed to be an assign, print or input
+(define (get-var com) (cadr com))
+
+; com is assumed to be a sequence
+(define (get-fst-com com)(cadr com))
+(define (get-snd-com com)(caddr com))
+
+; com is assumed to be a conditional or a while
+(define (get-cond com)(cadr com))
+
+; com is assumed to be a conditional
+(define (get-then com)(caddr com))
+(define (get-else com)(cadddr com))
+
+; com is assumed to be a while
+(define (get-body com)(caddr com))
+ 

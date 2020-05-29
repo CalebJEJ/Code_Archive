@@ -1,0 +1,43 @@
+# compiler
+CC = gcc
+
+# flags
+DEBUG = -g
+CFLAGS = -Wall -std=c99 -pedantic -c $(DEBUG)
+LFLAGS = -Wall -std=c99 -pedantic $(DEBUG)
+
+# file names in the project
+NAMEO = CJString.o CJConfigParser.o prog2main.o MetaDataParser.o CJSimulator.o simtimer.o
+
+#name of the file that will be executed to run the program
+ENDNAME = sim02
+
+
+#link compile
+$(ENDNAME) : $(NAMEO)
+	$(CC) $(LFLAGS) $(NAMEO) -o $(ENDNAME) 
+
+#individual compile
+CJString.o : CJString.c
+	$(CC) $(CFLAGS) CJString.c
+
+CJConfigParser.o : CJConfigParser.c
+	$(CC) $(CFLAGS) CJConfigParser.c
+
+MetaDataParser.o : MetaDataParser.c
+	$(CC) $(CFLAGS) MetaDataParser.c
+	
+CJSimulator.o : CJSimulator.c
+	$(CC) $(CFLAGS) CJSimulator.c
+
+prog2main.o : prog2main.c
+	$(CC) $(CFLAGS) prog2main.c
+	
+simtimer.o : simtimer.c
+	$(CC) $(CFLAGS) simtimer.c
+
+
+#clean : deletes the file used to run the program and any .o files
+clean:
+	\rm $(wildcard *.o) $(ENDNAME)
+
